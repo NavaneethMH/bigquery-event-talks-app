@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Explorer</title>
+    <meta name="description" content="A premium, dynamic web interface for exploring Google Cloud BigQuery release notes and updates. Search, filter, and track new features, changes, and deprecations.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="dark-theme">
+    <!-- Background Accents -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar or Header Panel -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-database logo-database"></i>
+                    <i class="fa-solid fa-bolt logo-bolt"></i>
+                </div>
+                <div>
+                    <h1 id="app-title">BigQuery Pulse</h1>
+                    <p class="logo-subtitle">Real-time Release Notes &amp; Insights</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="status-indicator" id="status-indicator" title="Data Status">
+                    <span class="status-dot green"></span>
+                    <span class="status-text" id="status-text">Connecting...</span>
+                </div>
+                
+                <button id="btn-refresh" class="action-btn" title="Refresh Notes">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Refresh</span>
+                </button>
+                
+                <button id="btn-settings" class="action-btn secondary" title="Configure Feed URL">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <section class="stats-dashboard" id="stats-dashboard">
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fa-solid fa-calendar-days"></i></div>
+                <div class="stat-details">
+                    <span class="stat-label">Total Releases</span>
+                    <span class="stat-value" id="stat-releases">-</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon emerald"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <div class="stat-details">
+                    <span class="stat-label">Features</span>
+                    <span class="stat-value" id="stat-features">-</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon rose"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="stat-details">
+                    <span class="stat-label">Issues &amp; Fixes</span>
+                    <span class="stat-value" id="stat-issues">-</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="stat-details">
+                    <span class="stat-label">Last Sync</span>
+                    <span class="stat-value" id="stat-sync">-</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls Section: Search & Category Filter -->
+        <section class="controls-panel">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="search-input" placeholder="Search release notes by keywords (e.g. Gemini, SQL, table)..." aria-label="Search release notes">
+                <button id="search-clear" class="clear-btn" style="display: none;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="category-filters-container">
+                <span class="filter-label">Filter by:</span>
+                <div class="category-pills" id="category-pills">
+                    <button class="pill-btn active" data-category="ALL">All Updates</button>
+                    <!-- Pills will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Area -->
+        <main class="content-viewport">
+            <!-- Loading State -->
+            <div class="loading-state" id="loading-state">
+                <div class="spinner">
+                    <div class="double-bounce1"></div>
+                    <div class="double-bounce2"></div>
+                </div>
+                <p>Retrieving BigQuery release notes...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state hidden" id="error-state">
+                <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <h2>Failed to Load Release Notes</h2>
+                <p id="error-message">Unknown error occurred. Please check your internet connection or the server logs.</p>
+                <button id="btn-retry" class="action-btn"><i class="fa-solid fa-arrows-rotate"></i> Retry Connection</button>
+            </div>
+
+            <!-- Notes List / Timeline -->
+            <div class="notes-timeline hidden" id="notes-timeline">
+                <!-- Grouped release notes will be generated here -->
+            </div>
+            
+            <!-- Empty Search Results -->
+            <div class="empty-state hidden" id="empty-state">
+                <div class="empty-icon"><i class="fa-solid fa-clipboard-question"></i></div>
+                <h2>No matching updates found</h2>
+                <p>Try refining your search queries or selecting a different category filter.</p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 BigQuery Pulse. Powered by Google Cloud Feed.</p>
+            <p class="source-info">Source Feed: <a id="footer-source-link" href="#" target="_blank" rel="noopener noreferrer">-</a></p>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settings-modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-sliders"></i> Feed Settings</h2>
+                <button class="close-modal-btn" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="feed-url-input">Feed XML Source URL</label>
+                    <p class="field-desc">The application parses an Atom or RSS release notes feed from this URL.</p>
+                    <input type="url" id="feed-url-input" placeholder="https://cloud.google.com/feeds/..." class="form-control">
+                </div>
+                <div class="info-alert" id="fallback-alert" style="display: none;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span><strong>Note:</strong> docs.cloud.google.com returned a 404 error. The application is currently using the Google Cloud fallback feed.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="btn-reset-feed">Reset to Default</button>
+                <div class="button-group">
+                    <button class="action-btn secondary" id="btn-cancel-settings">Cancel</button>
+                    <button class="action-btn" id="btn-save-settings">Save &amp; Reload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
